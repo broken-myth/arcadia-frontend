@@ -1,0 +1,5 @@
+node_modules/
+dist/
+config.ts
+public/assets/phaser/*
+!public/assets/phaser/.gitkeep
