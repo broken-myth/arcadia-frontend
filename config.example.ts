@@ -8,7 +8,7 @@ export const FRONTEND_URL =
 
 export const auth = {
 	CLIENT_ID: "",
-	REDIRECT_URI: `${FRONTEND_URL}/public/auth-callback.html`,
+	REDIRECT_URI: `${FRONTEND_URL}/auth-callback.html`,
 	SCOPE: [
 		"https://www.googleapis.com/auth/userinfo.profile",
 		"https://www.googleapis.com/auth/userinfo.email",

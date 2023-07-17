@@ -1,5 +1,5 @@
 import React from "react";
-import { IconCategory2, IconLogout, IconSettings } from "@tabler/icons";
+import { IconCategory2, IconLogout, IconHelp } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { getUser } from "../../utils/helpers";
 import { useDispatch } from "react-redux";
@@ -39,12 +39,14 @@ const Navbar: React.FC = () => {
 						className="hover:opacity-50 hover:cursor-pointer transition"
 					/>
 				</Link>
-				<IconSettings
-					color="white"
-					width={50}
-					height={50}
-					className="hover:opacity-50 hover:cursor-pointer transition"
-				/>
+				<Link to="howto">
+					<IconHelp
+						color="white"
+						width={50}
+						height={50}
+						className="hover:opacity-50 hover:cursor-pointer transition"
+					/>
+				</Link>
 				<IconLogout
 					color="white"
 					width={50}

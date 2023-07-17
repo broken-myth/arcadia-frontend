@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { TextInput } from "@mantine/core";
-import { IconEdit, IconCircleCheck } from "@tabler/icons";
+import { IconEdit, IconCircleCheck } from "@tabler/icons-react";
 import { useMutation } from "react-query";
 import { dataFetch } from "../../utils/helpers";
 import { showNotification } from "../../utils/helpers";
 import { updateProfileSuccess } from "../../actions/user";
 import { useDispatch } from "react-redux";
 import { UserDetailsBoxProps } from "./types";
-import { mutations } from "../../utils/constants";
+import { Mutations } from "../../utils/constants";
 
 interface MutationParams {
 	intendedUpdate: string;
@@ -19,7 +19,7 @@ const UserDetailsBox = (props: UserDetailsBoxProps): JSX.Element => {
 	const dispatch = useDispatch();
 
 	const { mutate } = useMutation({
-		mutationKey: mutations.updateProfilePOST + props.field,
+		mutationKey: Mutations.updateProfilePATCH + props.field,
 		mutationFn: async ({ intendedUpdate, newValue }: MutationParams) => {
 			let err = null;
 			if (intendedUpdate == "name" && newValue.length > 60) {
@@ -42,7 +42,7 @@ const UserDetailsBox = (props: UserDetailsBoxProps): JSX.Element => {
 			return dataFetch({
 				user: props.user,
 				url: "/api/user/profile",
-				method: "POST",
+				method: "PATCH",
 				body: {
 					intendedUpdate: intendedUpdate,
 					newValue: newValue,
@@ -50,13 +50,13 @@ const UserDetailsBox = (props: UserDetailsBoxProps): JSX.Element => {
 			});
 		},
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res.ok) {
 				showNotification("Success", "Profile updated", "success");
 				setEditOn(false);
-				const data = await res.json();
-				dispatch(updateProfileSuccess(data.message));
+				dispatch(updateProfileSuccess(data));
 			} else {
-				showNotification("Oops", "Something went wrong", "error");
+				showNotification("Oops", data.message, "error");
 			}
 		},
 	});
@@ -89,7 +89,6 @@ const UserDetailsBox = (props: UserDetailsBoxProps): JSX.Element => {
 							}}
 							className="w-[470px] box-border bg-new-white border-[0.25px] border-solid border-[rgba(255,255,255,0.403)] mt-[10px] rounded-[6.3px]"
 							variant="unstyled"
-							defaultValue={props.value}
 							placeholder={props.field}
 							onChange={(e) => setValue(e.currentTarget.value)}
 						/>

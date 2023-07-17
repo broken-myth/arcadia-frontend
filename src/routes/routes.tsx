@@ -14,6 +14,7 @@ const Characters = lazy(() => import("../components/Characters/Characters"));
 const MatchHistory = lazy(
 	() => import("../components/MatchHistory/MatchHistory")
 );
+const HowTo = lazy(() => import("../components/HowTo/HowTo"));
 
 const SuspenseFallback = () => {
 	return <div>Loading...</div>;
@@ -81,8 +82,12 @@ export const routes: RouteType[] = [
 						path="/game/match-history"
 						element={<LazyRouteElement element={<MatchHistory />} />}
 					/>
-					<Route path="/game/*" element={<NotFoundPage />} />
 				</Route>
+				<Route path="/game/*" element={<NotFoundPage />} />
+				<Route
+					path="/game/howto"
+					element={<LazyRouteElement element={<HowTo />} />}
+				/>
 			</>
 		),
 		title: "Game Page",

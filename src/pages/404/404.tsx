@@ -1,5 +1,20 @@
+import { Center } from "@mantine/core";
+import { Link } from "react-router-dom";
+
 const NotFoundPage = () => {
-	return <div className="underline h-screen">Page 404!</div>;
+	return (
+		<Center className="h-full w-full error-bg flex-col">
+			<h1 className="text-white font-heading error-shadow font-thin text-[18rem]">
+				404
+			</h1>
+			<Link
+				className="text-white underline font-heading text-xl transition-all hover:tracking-wider"
+				to="/"
+			>
+				Lost? Click here to get back
+			</Link>
+		</Center>
+	);
 };
 
 export default NotFoundPage;

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation } from "react-query";
-import { mutations } from "../../utils/constants";
+import { Mutations, Queries } from "../../utils/constants";
 import { dataFetch, getUser, showNotification } from "../../utils/helpers";
+import { updateProfileSuccess } from "../../actions/user";
+import { useDispatch } from "react-redux";
 import {
 	Events,
 	eventEmitter,
@@ -13,10 +15,12 @@ import MiniconUnlocked from "../MiniconUnlocked/MiniconUnlocked";
 import Matchmaking from "../Matchmaking/Matchmaking";
 
 import { OverlayState } from "./types";
+import { Center, Loader } from "@mantine/core";
+import { invalidateQueries } from "../../utils/queries";
 
 const useLootboxOpen = (user: User) => {
 	return useMutation({
-		mutationKey: mutations.lootboxOpenPOST,
+		mutationKey: Mutations.lootboxOpenPOST,
 		mutationFn: ({
 			x,
 			y,
@@ -47,11 +51,13 @@ interface OpenLootboxRes {
 
 const FreeRoamOverlay = () => {
 	const user = getUser();
-	const [overlay, setOverlay] = useState<OverlayState>(OverlayState.LOADING);
+	const [overlay, setOverlay] = useState<OverlayState>(OverlayState.NONE);
 	const [openLootboxResponse, setOpenLootboxResponse] =
 		useState<OpenLootboxRes | null>(null);
 
 	const openLootBox = useLootboxOpen(user);
+
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		const onLootboxOpened = ({
@@ -63,20 +69,24 @@ const FreeRoamOverlay = () => {
 			y: number;
 			lootboxID: string;
 		}) => {
+			setOverlay(OverlayState.LOADING);
 			openLootBox.mutate(
 				{ x, y, lootboxID },
 				{
 					onSuccess: async (res) => {
+						const data = await res.json();
 						if (res && res.status === 200) {
-							const data = await res.json();
 							setOverlay(OverlayState.MINICON_UNLOCKED);
-							setOpenLootboxResponse(data.message);
-						} else {
-							showNotification(
-								"Error",
-								"Error opening lootbox",
-								"error"
+							setOpenLootboxResponse(data);
+							dispatch(
+								updateProfileSuccess({
+									intendedUpdate: "unlockMinicon",
+								})
 							);
+							invalidateQueries(Queries.getAllMiniconsGET);
+						} else {
+							showNotification("Error", data.message, "error");
+							eventEmitter.emit(Events.RESUME_GAME, lootboxID);
 							return undefined;
 						}
 					},
@@ -85,7 +95,6 @@ const FreeRoamOverlay = () => {
 			eventEmitter.removeAllListeners(Events.LOOTBOX_OPEN);
 			eventEmitter.once(Events.LOOTBOX_OPEN, onLootboxOpened);
 		};
-		// Data Fetching
 
 		const onStartMatchmaking = () => {
 			setOverlay(OverlayState.MATCHMAKING);
@@ -101,6 +110,14 @@ const FreeRoamOverlay = () => {
 
 	if (overlay === OverlayState.NONE) {
 		return null;
+	}
+
+	if (overlay === OverlayState.LOADING) {
+		return (
+			<Center className="w-full h-full absolute backdrop-blur-md bg-kinda-black">
+				<Loader color="violet" size="lg" />
+			</Center>
+		);
 	}
 
 	if (overlay === OverlayState.MINICON_UNLOCKED && openLootboxResponse) {

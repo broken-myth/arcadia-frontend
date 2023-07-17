@@ -10,7 +10,11 @@ Clone the repository to your local device and
 yarn install
 ```
 
-2. Copy and `config.example.ts` then rename it as `config.ts` and fill the required contents.
+2. 
+```bash
+cp config.example.ts config.ts
+```
+ and make any necessary changes.
 
 3. Start the Vite Development Server in developer mode:
 

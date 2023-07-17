@@ -27,7 +27,11 @@ const PlayerCircle = ({
 						<Text className="font-heading font-bold text-white text-2xl">
 							{trophies}
 						</Text>
-						<Image src={"/assets/images/Trophy.webp"} className="w-7" />
+						<Image
+							alt="Trophy"
+							src={"/assets/images/Trophy.webp"}
+							className="w-7"
+						/>
 					</Box>
 				</Box>
 			</Box>

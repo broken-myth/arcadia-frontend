@@ -1,17 +1,18 @@
-import { Button, Center, Loader } from "@mantine/core";
-import { useState } from "react";
+import { Button, Center, Skeleton } from "@mantine/core";
+import { useEffect, useState } from "react";
 import {
 	DragDropContext,
 	Draggable,
 	Droppable,
 	DropResult,
 } from "react-beautiful-dnd";
-import { useMutation, useQuery } from "react-query";
+import { useMutation } from "react-query";
 import { Link, useNavigate } from "react-router-dom";
 import { StyledMinicon } from "..";
 import cardinalToOrdinal from "../../utils/cardinalToOrdinal";
-import { mutations, queries } from "../../utils/constants";
+import { Mutations, Queries } from "../../utils/constants";
 import { dataFetch, getUser, showNotification } from "../../utils/helpers";
+import { invalidateQueries, useMinicons } from "../../utils/queries";
 import { addToList, removeFromList } from "./helper";
 import { LockedMinicon, MutationParams, UnlockedMinicon } from "./types";
 const positionArr = [1, 2, 3, 4, 5];
@@ -33,58 +34,40 @@ const Minicons = () => {
 		navigate("/login");
 	}
 
-	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: queries.getAllMiniconsGET,
-		queryFn: async () => {
-			return dataFetch({
-				user: user,
-				url: "/api/minicon/",
-			});
-		},
-		onSuccess: async (res) => {
-			if (res && res.status === 200) {
-				const data = await res.json();
-				/* eslint-disable no-mixed-spaces-and-tabs */
-				data.message.lineup === null
-					? (setLineUp([]),
-					  setButtonIsVisible(true),
-					  setLineupExist(false))
-					: setLineUp(data.message.lineup);
-				data.message.unlocked === null
-					? setUnlocked([])
-					: setUnlocked(data.message.unlocked);
-				data.message.locked === null
-					? setLocked([])
-					: setLocked(data.message.locked);
-			}
-			/* eslint-enable no-mixed-spaces-and-tabs */
-		},
-	});
+	const { isLoading, isError, isSuccess, data } = useMinicons(user);
 
-	const { mutate } = useMutation({
-		mutationKey: mutations.updateLineupPOST,
+	useEffect(() => {
+		if (data) {
+			data.lineup === null
+				? (setLineUp([]), setButtonIsVisible(true), setLineupExist(false))
+				: setLineUp([...data.lineup]);
+			data.unlocked === null
+				? setUnlocked([])
+				: setUnlocked([...data.unlocked]);
+			data.locked === null ? setLocked([]) : setLocked([...data.locked]);
+		}
+	}, [data]);
+
+	const updateLineup = useMutation({
+		mutationKey: Mutations.updateLineupPATCH,
 		mutationFn: async ({ lineupIDArr }: MutationParams) => {
 			return dataFetch({
 				user: user,
 				url: "/api/minicon/updateLineup",
-				method: "POST",
+				method: "PATCH",
 				body: {
 					lineupIDArr: lineupIDArr,
 				},
 			});
 		},
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res.ok) {
-				const data = await res.json();
-				showNotification("Success", data.message, "success");
+				await invalidateQueries(Queries.getAllMiniconsGET);
+				showNotification("Success", data, "success");
 				setButtonIsVisible(false);
 			} else {
-				const data = await res.json();
-				if (data.message) {
-					showNotification("Oops", data.message, "error");
-				} else {
-					showNotification("Oops", data.message, "error");
-				}
+				showNotification("Oops", data.message, "error");
 			}
 		},
 	});
@@ -178,6 +161,7 @@ const Minicons = () => {
 							{...provided.draggableProps}
 							{...provided.dragHandleProps}
 							to={`../minicon/${minicon.miniconID}`}
+							className="h-fit"
 						>
 							<StyledMinicon
 								locked={false}
@@ -237,11 +221,6 @@ const Minicons = () => {
 
 	return (
 		<main className="h-full w-full">
-			{isLoading && (
-				<Center className="h-full w-full">
-					<Loader color="violet" />
-				</Center>
-			)}
 			{isError && (
 				<Center className="h-full w-full">
 					<h1 className="text-4xl font-bold text-gray-800">
@@ -249,100 +228,148 @@ const Minicons = () => {
 					</h1>
 				</Center>
 			)}
-			{isSuccess && (
-				<>
-					<DragDropContext onDragEnd={onDragEnd}>
-						<div className="relative h-screen basis-[80%] flex flex-col items-center justify-between bg-[rgba(0,0,0,0.424)] overflow-y-auto scrollBar">
-							<div className="box-border pl-[5%] w-[100%] pt-[1%] pr-[5%] flex flex-col items-start justify-between basis-[41%] bg-transparent">
-								<span className="font-heading not-italic font-bold text-white text-[36px] leading-[54px]">
-									LINEUP
-								</span>
-								<Droppable
-									direction="horizontal"
-									key="lineup"
-									droppableId="lineup"
-								>
-									{(provided) => (
-										<div
-											ref={provided.innerRef}
-											{...provided.droppableProps}
-											className={`bg-[rgba(0,0,0,0.4)] relative pt-[2%] ${
-												lineupExist ? "pt-[2%]" : "pt-0"
-											} w-full h-[380px] mt-[32px] rounded-[30px] grid grid-cols-5 overflow-hidden `}
-										>
-											{lineUpItems}
-											{provided.placeholder}
-											{!lineup?.length && (
-												<div className="bg-transparent absolute top-0 left-0 tracking-wider font-heading text-[32px] w-full h-[330px] mt-[32px] rounded-[30px] flex flex-col items-center justify-center text-white ">
-													Please set your lineup
-												</div>
-											)}
-										</div>
-									)}
-								</Droppable>
-								<div className=" bg-transparent mt-[-70px] relative w-full h-[50px] flex flex-row items-center justify-around ">
-									{positionArr.map((item, index) => {
-										return (
-											<div
-												key={index}
-												className="text-white text-[26px] w-full flex items-center justify-center"
-											>
-												<span className=" font-heading">
-													{cardinalToOrdinal(item)}
-												</span>
-											</div>
-										);
-									})}
-								</div>
-							</div>
-							<div className=" box-border relative flex w-[100%] pl-[5%] pt-[1%] pr-[5%] pb-[2%] flex-col items-start justify-between basis-[51%] mt-[1%]">
-								<div className="mb-[2%] mt-[3%] relative w-[100%] flex flex-row items-center justify-center">
-									{buttonIsVisible && (
-										<Button
-											onClick={() => {
-												let lineupIDArr: number[] = [];
-												lineup?.map((minicon) => {
-													lineupIDArr = [
-														...lineupIDArr,
-														minicon.ownedMiniconID,
-													];
-												});
-												mutate({ lineupIDArr });
-											}}
-											variant="default"
-											size="lg"
-										>
-											Update
-										</Button>
-									)}
-								</div>
-								{unlocked !== null && unlocked.length !== 0 && (
-									<Droppable
-										direction="horizontal"
-										key="all"
-										droppableId="all"
-									>
-										{(provided) => (
-											<div
-												ref={provided.innerRef}
-												{...provided.droppableProps}
-												className="bg-[rgba(0,0,0,0.4)] w-full pt-[3%] pb-[2%] gap-y-[85px] mt-[32px] rounded-[30px] box-content grid grid-flow-row grid-cols-5 overflow-hidden"
-											>
-												{unlockedItems}
 
-												{provided.placeholder}
+			<DragDropContext onDragEnd={onDragEnd}>
+				<div className="relative h-screen basis-[80%] flex flex-col items-center justify-between bg-[rgba(0,0,0,0.424)] overflow-y-auto scrollBar">
+					<div className="box-border pl-[5%] w-[100%] pt-[1%] pr-[5%] flex flex-col items-start justify-between basis-[41%] bg-transparent">
+						<span className="font-heading not-italic font-bold text-white text-[36px] leading-[54px]">
+							LINEUP
+						</span>
+						<Droppable
+							direction="horizontal"
+							key="lineup"
+							droppableId="lineup"
+						>
+							{(provided) => (
+								<div
+									ref={provided.innerRef}
+									{...provided.droppableProps}
+									className={`bg-[rgba(0,0,0,0.4)] relative pt-[2%] pb-[1%] ${
+										lineupExist ? "pt-[2%]" : "pt-0"
+									} w-full h-[20vw] pb-5 mt-[32px] rounded-[30px] grid grid-cols-5 overflow-hidden `}
+								>
+									<>
+										{isLoading && (
+											<>
+												{[...Array(5)].map((_, index) => (
+													<Center
+														key={"skeleton-minicons-" + index}
+														className="w-full h-full"
+													>
+														<Skeleton
+															height={200}
+															mb="xl"
+															circle
+														/>
+													</Center>
+												))}
+											</>
+										)}
+										{isSuccess && !isLoading && lineUpItems}
+										{provided.placeholder}
+										{isSuccess && !isLoading && !lineup?.length && (
+											<div className="bg-transparent absolute top-0 max-xl:text-base left-0 tracking-wider font-heading text-[32px] w-full h-[300px] mt-0 rounded-[30px] flex flex-col items-center justify-center text-white ">
+												Please set your lineup
 											</div>
 										)}
-									</Droppable>
-								)}
-								<div className="bg-[rgba(0,0,0,0.4)] w-full pt-[3%] pb-[2%] gap-y-[85px] mt-[32px] rounded-[30px] box-content grid grid-flow-row grid-cols-5 overflow-hidden">
-									{lockedItems}
+									</>
 								</div>
-							</div>
+							)}
+						</Droppable>
+
+						<div className=" bg-transparent mt-[-60px] relative w-full h-[50px] flex flex-row items-center justify-around ">
+							{positionArr.map((item, index) => {
+								return (
+									<div
+										key={index}
+										className="text-white text-[26px] max-xl:text-lg w-full flex items-center justify-center"
+									>
+										<span className=" font-heading">
+											{cardinalToOrdinal(item)}
+										</span>
+									</div>
+								);
+							})}
 						</div>
-					</DragDropContext>
-				</>
-			)}
+					</div>
+					<div className=" box-border relative flex w-[100%] pl-[5%] pt-[1%] pr-[5%] pb-[2%] flex-col items-start justify-between basis-[60%]">
+						<div className="my-[2%] relative w-[100%] flex flex-row items-center justify-center">
+							{buttonIsVisible && (
+								<Button
+									loading={updateLineup.isLoading}
+									onClick={() => {
+										let lineupIDArr: number[] = [];
+										lineup?.map((minicon) => {
+											lineupIDArr = [
+												...lineupIDArr,
+												minicon.ownedMiniconID,
+											];
+										});
+										updateLineup.mutate({ lineupIDArr });
+									}}
+									variant="default"
+									size="lg"
+								>
+									SET LINEUP
+								</Button>
+							)}
+						</div>
+						{unlocked !== null && unlocked.length !== 0 && (
+							<Droppable
+								direction="horizontal"
+								key="all"
+								droppableId="all"
+							>
+								{(provided) => (
+									<div
+										ref={provided.innerRef}
+										{...provided.droppableProps}
+										className="bg-[rgba(0,0,0,0.4)] max-2xl:min-h-[15vw]  w-full pt-[3%] pb-[5%] gap-y-[7.8vh] mt-[10px] rounded-[30px] box-content grid grid-flow-row grid-cols-5 overflow-hidden"
+									>
+										{isLoading && (
+											<>
+												{[...Array(5)].map((_, index) => (
+													<Center
+														key={
+															"skeleton-unlocked-minicons-" +
+															index
+														}
+														className="w-full h-full"
+													>
+														<Skeleton
+															height={200}
+															mb="xl"
+															circle
+														/>
+													</Center>
+												))}
+											</>
+										)}
+										{isSuccess && !isLoading && unlockedItems}
+
+										{provided.placeholder}
+									</div>
+								)}
+							</Droppable>
+						)}
+						<div className="bg-[rgba(0,0,0,0.4)] w-full pt-[3%] pb-[5%] gap-y-[85px] mt-[32px] rounded-[30px] box-content grid grid-flow-row grid-cols-5 overflow-hidden">
+							{isLoading && (
+								<>
+									{[...Array(5)].map((_, index) => (
+										<Center
+											key={"skeleton-locked-minicons-" + index}
+											className="w-full h-full"
+										>
+											<Skeleton height={200} mb="xl" circle />
+										</Center>
+									))}
+								</>
+							)}
+							{isSuccess && !isLoading && lockedItems}
+						</div>
+					</div>
+				</div>
+			</DragDropContext>
 		</main>
 	);
 };

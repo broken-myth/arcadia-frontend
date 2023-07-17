@@ -11,7 +11,7 @@
 		"format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|jsx|tsx|json)\"",
 		"dev": "vite",
 		"build": "tsc && vite build",
-		"build:free-roam": "cd packages/free-roam && cp -r ./public/assets/phaser/* ../../public/assets/phaser && npm run build"
+		"serve": "vite preview"
 	},
 	"lint-staged": {
 		"*.{ts,tsx}": [
@@ -22,17 +22,18 @@
 	"author": "Delta Force",
 	"license": "ISC",
 	"dependencies": {
-		"free-roam": "file:packages/free-roam",
 		"@emotion/react": "^11.10.5",
 		"@mantine/core": "^5.10.0",
 		"@mantine/hooks": "^5.10.0",
 		"@mantine/notifications": "^5.10.0",
 		"@reduxjs/toolkit": "^1.9.1",
-		"@tabler/icons": "^1.118.0",
+		"@tabler/icons-react": "^2.10.0",
+		"free-roam": "file:packages/free-roam",
 		"react": "^18.2.0",
 		"react-beautiful-dnd": "^13.1.1",
 		"react-dom": "^18.2.0",
 		"react-error-boundary": "^3.1.4",
+		"react-full-page": "^0.1.12",
 		"react-helmet": "^6.1.0",
 		"react-query": "^3.39.2",
 		"react-redux": "^8.0.5",
@@ -55,8 +56,10 @@
 		"lint-staged": "^13.1.0",
 		"postcss": "^8.4.20",
 		"prettier": "^2.8.1",
+		"rollup-plugin-workbox": "^6.2.0",
 		"tailwindcss": "^3.2.4",
 		"typescript": "^4.9.4",
-		"vite": "^4.0.2"
+		"vite": "^4.0.2",
+		"vite-plugin-minify": "^1.5.2"
 	}
 }

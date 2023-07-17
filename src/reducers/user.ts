@@ -24,6 +24,8 @@ export default function postReducer(state: any = null, action: any) {
 				};
 			} else if (action.payload.intendedUpdate === "contact") {
 				return { ...state, contact: action.payload.newValue };
+			} else if (action.payload.intendedUpdate === "unlockMinicon") {
+				return { ...state, numberOfMinicons: state.numberOfMinicons + 1 };
 			}
 			break;
 		case LOGOUT:

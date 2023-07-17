@@ -1,4 +1,4 @@
-import { IconDroplet, IconFlame, IconShield } from "@tabler/icons";
+import { IconDroplet, IconFlame, IconShield } from "@tabler/icons-react";
 
 const StatsMinicon = (props: {
 	fire: number;

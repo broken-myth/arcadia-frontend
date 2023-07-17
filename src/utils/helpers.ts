@@ -17,6 +17,11 @@ interface DatafetchParams {
 	method?: "POST" | "GET" | "PUT" | "DELETE" | "PATCH";
 }
 
+interface ClientSideSendParams {
+	user: User;
+	error: string | object;
+}
+
 export const dataFetch = async ({
 	url,
 	user,
@@ -97,11 +102,29 @@ export const showNotification = (
 		},
 	});
 };
-export const getTopThree = (leaderboardArray: Player[]) => {
+export const getTopThree = (leaderboardArray: Player[] | null) => {
+	if (!leaderboardArray) return [];
+
 	const topThree: Player[] = leaderboardArray
 		.filter(
 			(player) => player.rank === 1 || player.rank === 2 || player.rank === 3
 		)
 		.sort((a, b) => (a.rank > b.rank ? 1 : a.rank < b.rank ? -1 : 0));
 	return topThree;
+};
+
+export const logErrorToServer = async ({ user, error }: ClientSideSendParams) => {	
+		try {
+			await fetch(BACKEND_URL + "/api/error", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${user.userToken}`,
+				},
+				body: JSON.stringify(error),
+			});
+		} catch (error) {
+			console.error(error);
+			throw error;
+		}	
 };

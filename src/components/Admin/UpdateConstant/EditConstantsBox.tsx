@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { TextInput } from "@mantine/core";
-import { IconEdit, IconCircleCheck } from "@tabler/icons";
+import { IconEdit, IconCircleCheck } from "@tabler/icons-react";
 import { useMutation } from "react-query";
-import { mutations } from "../../../utils/constants";
+import { Mutations } from "../../../utils/constants";
 import { dataFetch, showNotification } from "../../../utils/helpers";
 import { EditConstantsBoxType } from "./types";
 
@@ -15,12 +15,12 @@ const EditConstantsBox = (props: EditConstantsBoxType): JSX.Element => {
 	};
 
 	const { mutate } = useMutation({
-		mutationKey: mutations.updateConstantsPOST,
+		mutationKey: Mutations.updateConstantsPATCH,
 		mutationFn: async () =>
 			dataFetch({
 				user: props.admin,
 				url: "/api/admin/updateConstants",
-				method: "POST",
+				method: "PATCH",
 				body: {
 					name: props.field,
 					newValue: Number(value),

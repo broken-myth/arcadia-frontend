@@ -7,25 +7,30 @@ import "./App.css";
 import { ErrorBoundary } from "react-error-boundary";
 import { FallbackUI } from "./components";
 import { NotificationsProvider } from "@mantine/notifications";
-import { QueryClient, QueryClientProvider } from "react-query";
+import { QueryClientProvider } from "react-query";
 import { PersistGate } from "redux-persist/integration/react";
-
-const queryClient = new QueryClient({
-	defaultOptions: {
-		queries: {
-			retry: false,
-			refetchOnWindowFocus: false,
-		},
-	},
-});
+import { logErrorToServer } from "./utils/helpers";
+import { queryClient } from "./utils/queries";
 
 const appendCache = createEmotionCache({ key: "mantine", prepend: false });
+
 const App = () => {
 	return (
 		<ErrorBoundary
 			FallbackComponent={FallbackUI}
 			onError={(error: Error) => {
-				console.error(error);
+				const state = store.getState();
+				const user = state.user;
+				if (user) {
+					logErrorToServer({
+						user: user,
+						error: {
+							error: error.stack,
+						},
+					});
+				} else {
+					console.error("error");
+				}
 			}}
 		>
 			<Provider store={store}>

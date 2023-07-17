@@ -1,8 +1,4 @@
-export interface matchHistoryData {
-	matchHistory: matchHistory[];
-}
-
-export interface matchHistory {
+export interface MatchHistoryType {
 	matchID: number;
 	opponentID: number;
 	opponentUsername: string;

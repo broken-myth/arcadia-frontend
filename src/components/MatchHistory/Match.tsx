@@ -1,7 +1,7 @@
-import { matchHistory } from "./types";
+import { MatchHistoryType } from "./types";
 
 const Match = (props: {
-	match: matchHistory;
+	match: MatchHistoryType;
 	clickedID: number | null;
 	onClick: () => void;
 }) => {

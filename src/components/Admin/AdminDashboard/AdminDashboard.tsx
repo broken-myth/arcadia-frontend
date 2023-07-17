@@ -1,6 +1,6 @@
 import { Center, Loader } from "@mantine/core";
 import { useQuery } from "react-query";
-import { queries } from "../../../utils/constants";
+import { Queries } from "../../../utils/constants";
 import { dataFetch, getUser } from "../../../utils/helpers";
 import { logout } from "../../../actions/user";
 import { useDispatch } from "react-redux";
@@ -10,7 +10,7 @@ const AdminDashboard = (props: AdminDashboardType) => {
 	const dispatch = useDispatch();
 
 	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: queries.verifyAdminGET,
+		queryKey: Queries.verifyAdminGET,
 		queryFn: async () =>
 			dataFetch({
 				user: admin,

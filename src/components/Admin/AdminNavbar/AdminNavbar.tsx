@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { IconLogout } from "@tabler/icons";
+import { IconLogout } from "@tabler/icons-react";
 import { useDispatch } from "react-redux";
 import { logout } from "../../../actions/user";
 

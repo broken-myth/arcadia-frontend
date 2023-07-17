@@ -1,7 +1,7 @@
 import { Box, Button, Center, Group, Image, Text } from "@mantine/core";
-import { IconSearch } from "@tabler/icons";
+import { IconSearch } from "@tabler/icons-react";
 import { useQuery } from "react-query";
-import { queries } from "../../utils/constants";
+import { Queries } from "../../utils/constants";
 import { dataFetch, getUser, showNotification } from "../../utils/helpers";
 import { MatchDetails, OverlayState } from "../FreeRoamOverlay/types";
 import PlayerCircle from "../PlayerCircle/PlayerCircle";
@@ -25,8 +25,18 @@ const Matchmaking = ({
 	);
 	const [matchDetails, setMatchDetails] = useState<MatchDetails | null>(null);
 
+	const setupListener = () => {
+		eventEmitter.removeAllListeners(Events.START_MATCHMAKING);
+
+		const onStartMatchmaking = () => {
+			setOverlay(OverlayState.MATCHMAKING);
+		};
+
+		eventEmitter.once(Events.START_MATCHMAKING, onStartMatchmaking);
+	};
+
 	const { isLoading, isError } = useQuery({
-		queryKey: queries.startMatchGET,
+		queryKey: Queries.startMatchGET,
 		queryFn: () => {
 			setMatchMakingState(MatchmakingState.SEARCHING);
 			return dataFetch({
@@ -38,11 +48,12 @@ const Matchmaking = ({
 			const data = await res.json();
 			if (res.ok) {
 				setMatchMakingState(MatchmakingState.MATCH_FOUND);
-				setMatchDetails(data.message);
+				setMatchDetails(data);
 			} else {
 				showNotification("Error", data.message, "error");
 				setOverlay(OverlayState.NONE);
-				eventEmitter.emit(Events.RESUME_GAME);
+				eventEmitter.emit(Events.MATCH_ENDED);
+				setupListener();
 			}
 		},
 	});
@@ -60,6 +71,7 @@ const Matchmaking = ({
 					/>
 					<Box className="h-[100%] flex flex-col items-center justify-center">
 						<Image
+							alt="Sword Fight"
 							src={"/assets/images/sword-fight.webp"}
 							className="w-52"
 						/>
@@ -98,6 +110,7 @@ const Matchmaking = ({
 						/>
 						<Center className="h-[100%] border-red-100 flex flex-col items-center justify-start">
 							<Image
+								alt="Sword Fight"
 								src={"/assets/images/sword-fight.webp"}
 								className="w-52 mt-10"
 							/>
@@ -117,6 +130,7 @@ const Matchmaking = ({
 							onClick={() => {
 								setOverlay(OverlayState.NONE);
 								eventEmitter.emit(Events.MATCH_ENDED);
+								setupListener();
 								showNotification(
 									"Note",
 									"Feature yet to be made :)",
@@ -130,6 +144,7 @@ const Matchmaking = ({
 							className="w-[200px]"
 							onClick={() => {
 								setOverlay(OverlayState.NONE);
+								setupListener();
 								eventEmitter.emit(Events.MATCH_ENDED);
 							}}
 						>

@@ -12,6 +12,7 @@ const MiniconUnlocked = ({
 		<Box className="w-full h-full grid absolute z-10 grid-cols-6 grid-rows-6 overflow-hidden backdrop-blur-md bg-kinda-black">
 			<Center className="col-start-1 row-start-1 col-end-7 row-end-7">
 				<Image
+					alt="Rewards Light"
 					classNames={{
 						root: "w-full",
 						figure: "w-full",
@@ -23,6 +24,7 @@ const MiniconUnlocked = ({
 			</Center>
 			<Center className="col-start-1 animate-pulse row-start-1 col-end-7 row-end-7">
 				<Image
+					alt="Glow Circle"
 					classNames={{
 						root: "h-full w-[unset]",
 						figure: "h-full",
@@ -34,6 +36,7 @@ const MiniconUnlocked = ({
 			</Center>
 			<Center className="col-start-1 animate-minicon-reveal row-start-1 col-end-7 row-end-7">
 				<Image
+					alt="Minicon"
 					classNames={{
 						root: "h-[80%] w-[unset]",
 						figure: "h-full",

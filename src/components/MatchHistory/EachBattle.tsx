@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { dataFetch, getUser } from "../../utils/helpers";
+import { dataFetch, getUser, showNotification } from "../../utils/helpers";
 import { useQuery } from "react-query";
 import { Center, Loader } from "@mantine/core";
-import { queries } from "../../utils/constants";
+import { Queries } from "../../utils/constants";
 
 const EachBattle = (props: { battleID: number }) => {
 	const [matchDetailsData, setMatchDetails] = useState({
@@ -15,16 +15,18 @@ const EachBattle = (props: { battleID: number }) => {
 	const user = getUser();
 
 	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: [queries.getMatchDetailsGET, props.battleID],
+		queryKey: [Queries.getMatchDetailsGET, props.battleID],
 		queryFn: async () =>
 			dataFetch({
 				user: user,
 				url: "/api/match/" + props.battleID,
 			}),
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res && res.status === 200) {
-				const data = await res.json();
-				setMatchDetails(data.message);
+				setMatchDetails(data);
+			} else {
+				showNotification("Error", data.message, "error");
 			}
 		},
 	});

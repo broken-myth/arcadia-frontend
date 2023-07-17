@@ -1,3 +1,3 @@
 interface AdminDashboardType {
-    setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+	setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
 }

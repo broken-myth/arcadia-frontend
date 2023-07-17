@@ -3,9 +3,9 @@ import { useState } from "react";
 import { FreeRoamLayer } from "free-roam";
 import { dataFetch, getUser, showNotification } from "../../utils/helpers";
 import { useQuery } from "react-query";
-import { queries } from "../../utils/constants";
+import { Queries } from "../../utils/constants";
 import FreeRoamOverlay from "../FreeRoamOverlay/FreeRoamOverlay";
-import { Center } from "@mantine/core";
+import { Center, Loader } from "@mantine/core";
 
 interface LootboxDetail {
 	x: number;
@@ -22,7 +22,7 @@ const FreeRoam = () => {
 	const [lootboxDetails, setLootboxDetails] =
 		useState<GetLootboxesResponse | null>(null);
 	const { isError, isLoading } = useQuery(
-		queries.getLootboxesGET,
+		Queries.getLootboxesGET,
 		() => {
 			return dataFetch({
 				url: "/api/lootbox",
@@ -37,15 +37,15 @@ const FreeRoam = () => {
 					return;
 				}
 				if (
-					data.message === null ||
-					data.message.lootboxes === null ||
-					!Array.isArray(data.message.lootboxes) ||
-					data.message.lootboxes.length === 0
+					data === null ||
+					data.lootboxes === null ||
+					!Array.isArray(data.lootboxes) ||
+					data.lootboxes.length === 0
 				) {
 					showNotification("Error", "No lootboxes found", "error");
 					return;
 				}
-				setLootboxDetails(data.message);
+				setLootboxDetails(data);
 			},
 		}
 	);
@@ -53,9 +53,9 @@ const FreeRoam = () => {
 	return (
 		<div className="w-full h-full">
 			{isLoading && (
-				<div className="absolute bg-transparent w-full h-full">
-					Loading...
-				</div>
+				<Center className="absolute bg-transparent w-full h-full">
+					<Loader color="violet" />
+				</Center>
 			)}
 			{isError && (
 				<div className="absolute bg-transparent w-full h-full">Error</div>
@@ -71,7 +71,7 @@ const FreeRoam = () => {
 				</>
 			) : (
 				<Center className="bg-new-black w-full h-full text-new-white">
-					Loading...
+					<Loader color="violet" />
 				</Center>
 			)}
 		</div>

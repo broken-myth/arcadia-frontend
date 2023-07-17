@@ -1,0 +1,11 @@
+version: '3.9'
+
+services:
+  web:
+    container_name: arcadia_client
+    image: arcadia-23-client
+    build: 
+      context: .
+    ports:
+      - '8000:80'
+    restart: always

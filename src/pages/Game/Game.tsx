@@ -1,7 +1,7 @@
 import { FreeRoam } from "../../components";
 import { useQuery } from "react-query";
-import { queries } from "../../utils/constants";
-import { dataFetch, getUser } from "../../utils/helpers";
+import { Queries } from "../../utils/constants";
+import { dataFetch, getUser, showNotification } from "../../utils/helpers";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Button, Center, Flex, Loader, Modal } from "@mantine/core";
 import { getProfileSuccess } from "../../actions/user";
@@ -17,16 +17,18 @@ const Game = () => {
 	const user = getUser();
 
 	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: queries.getProfileGET,
+		queryKey: Queries.getProfileGET,
 		queryFn: async () =>
 			dataFetch({
 				user: user,
 				url: "/api/user/profile",
 			}),
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res && res.status === 200) {
-				const data = await res.json();
-				dispatch(getProfileSuccess(data.message));
+				dispatch(getProfileSuccess(data));
+			} else {
+				showNotification("Error", data.message, "error");
 			}
 			setModalOpen(true);
 		},
@@ -49,7 +51,7 @@ const Game = () => {
 			)}
 			{isError && (
 				<Center className="h-full w-full">
-					<h1 className="text-4xl font-bold text-gray-800">
+					<h1 className="text-4xl font-bold text-new-white">
 						Something went wrong
 					</h1>
 				</Center>

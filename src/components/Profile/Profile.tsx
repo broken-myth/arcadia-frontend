@@ -1,9 +1,9 @@
 import React from "react";
-import Trophy from "../Trophy/Trophy";
-import UserDetailsBox from "./UserDetailsBox";
 import { getUser } from "../../utils/helpers";
 import { useNavigate } from "react-router-dom";
+import UserDetailsBox from "./UserDetailsBox";
 import cardinalToOrdinal from "../../utils/cardinalToOrdinal";
+import Trophy from "../Trophy/Trophy";
 
 const Profile: React.FC = (): JSX.Element => {
 	const user = getUser();
@@ -14,40 +14,40 @@ const Profile: React.FC = (): JSX.Element => {
 	}
 
 	return (
-		<div className="relative h-screen w-full flex flex-col items-center bg-[rgba(0,0,0,0.424)]">
-			{/* Top Container */}
-			<div className="h-[45vh] w-full box-border pl-[10%] pr-[12%] flex flex-row items-center justify-between">
-				<div className="flex flex-row justify-center h-[272px] w-fit gap-x-[85px]">
+		<div className="relative h-screen w-full border-box bg-[rgba(0,0,0,0.424)] flex flex-col p-10 ">
+			<div className="w-full basis-[50%] flex flex-row border-b-0 border-solid border-white">
+				<div className="basis-[30%] relative flex items-center pl-10 justify-start">
 					<img
 						src={`/assets/images/characters/avatars/${user.characterURL}`}
-						className="box-content w-[255px] h-[255px] 
-                        rounded-[50%] outline outline-[15px] outline-white"
+						className="rounded-[50%] border-solid border-white border-[8px]"
 						alt="User PIC"
+						width="275px"
+						height="275px"
 					/>
-					<div className="flex justify-center h-[270px] flex-col">
-						<span className="font-heading not-italic font-semibold text-white text-4xl leading-[56px] mb-[10px]">
-							{user.username}
-						</span>
-						<span className=" font-heading not-italic font-normal text-white text-[32px] leading-[47px] mb-[3px]">
-							{user.xp}
-							<span className="text-white font-bold">XP</span>
-						</span>
-						<span className="font-heading not-italic font-normal text-white text-[32px] leading-[47px] mb-[3px]">
-							{user.numberOfMinicons} Minicons
-						</span>
-						<span className="font-heading not-italic font-normal text-white text-[32px] leading-[47px] mb-[3px]">
-							Rank:{" "}
-							<span className="text-white font-bold">
-								{cardinalToOrdinal(user.rank || 0)}
-							</span>
-						</span>
-					</div>
 				</div>
-				<Trophy position={user.trophies || 0} />
+				<div className="basis-[45%] max-2xl:p-10 pl-1 gap-4 max-2xl:gap-3 flex animate-fadeIn flex-col items-start justify-center">
+					<span className="font-heading not-italic font-semibold text-white text-4xl leading-10">
+						{user.username}{" "}
+					</span>{" "}
+					<span className=" font-heading not-italic font-normal text-white text-3xl leading-10 max-xl:leading-8 max-xl:text-2xl ">
+						{user.xp}
+						<span className="text-white font-normal">XP</span>{" "}
+					</span>{" "}
+					<span className="font-heading not-italic font-normal text-white text-3xl leading-10 max-xl:leading-8 max-xl:text-2xl">
+						{user.numberOfMinicons} Minicons{" "}
+					</span>{" "}
+					<span className="font-heading not-italic font-normal text-white text-3xl leading-10 max-xl:leading-8 max-xl:text-2xl">
+						Rank:{" "}
+						<span className="text-white font-normal opacity-90">
+							{cardinalToOrdinal(user.rank || 0)}{" "}
+						</span>{" "}
+					</span>
+				</div>
+				<div className="basis-[25%] pl-12 flex flex-row items-center justify-start">
+					<Trophy position={user.trophies || 0}></Trophy>
+				</div>
 			</div>
-
-			{/* Bottom Container */}
-			<div className="flex flex-col justify-start w-full pl-[10%]">
+			<div className="w-full basis-[50%] animate-fadeIn pl-12 flex flex-col items-left justify-start">
 				<UserDetailsBox
 					user={user}
 					editable={true}

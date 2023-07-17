@@ -1,22 +1,19 @@
 /* eslint-disable no-unused-vars */
-interface TokenResponseType {
-	message: string;
-	statusCode: number;
-}
-
 enum IntendedAction {
 	Login,
 	Signup,
+	None,
 }
 
 enum AuthStatusEnum {
-	PRE, // Wait for UI to trigger
-	START,
-	WAITING, // WAITING FOR AUTH RESPONSE
-	ACCEPTED,
-	REJECTED,
-	AUTH, // sending dauth data to backend
-	ERROR, // some error occurred, ask user to try again
+	PRE = "PRE", // Wait for UI to trigger
+	START = "START", // UI triggered, start auth
+	WAITING = "WAITING", // waiting for auth response
+	ACCEPTED = "ACCEPTED", // auth accepted, waiting for server response
+	REJECTED = "REJECTED", // auth rejected
+	AUTH = "AUTH", // auth success, waiting for server response
+	ERROR = "ERROR", // auth error
+	SUCCESS = "SUCCESS", // auth success from server
 }
 
 export { TokenResponseType, IntendedAction, AuthStatusEnum };

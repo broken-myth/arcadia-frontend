@@ -2,8 +2,8 @@ import { Center, Loader } from "@mantine/core";
 import { useState } from "react";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
-import { queries } from "../../utils/constants";
-import { dataFetch, getUser } from "../../utils/helpers";
+import { Queries } from "../../utils/constants";
+import { dataFetch, getUser, showNotification } from "../../utils/helpers";
 import MiniconAbilities from "./MiniconAbilities";
 import StatsMinicon from "./StatsMinicon";
 import { MiniconDetails } from "./types";
@@ -19,7 +19,7 @@ const Minicon = (): JSX.Element => {
 		navigate("/login");
 	}
 	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: queries.getAllMiniconsGET,
+		queryKey: Queries.getAllMiniconsGET,
 		queryFn: async () => {
 			return dataFetch({
 				user: user,
@@ -27,9 +27,11 @@ const Minicon = (): JSX.Element => {
 			});
 		},
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res && res.status === 200) {
-				const data = await res.json();
-				setMiniconDetails(data.message);
+				setMiniconDetails(data);
+			} else {
+				showNotification("Error", data.message, "error");
 			}
 		},
 	});

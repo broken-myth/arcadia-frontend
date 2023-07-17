@@ -8,6 +8,14 @@ import { AuthStatusEnum, IntendedAction } from "./types.d";
 import { showNotification } from "../../utils/helpers";
 import { Button } from "@mantine/core";
 
+const getAuthButtonLoadingState = (authStatus: AuthStatusEnum) => {
+	return (
+		authStatus === AuthStatusEnum.START ||
+		authStatus === AuthStatusEnum.WAITING ||
+		authStatus === AuthStatusEnum.AUTH
+	);
+};
+
 const generateOAuth2String = (): URL => {
 	const oAuth2Url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
 
@@ -40,8 +48,8 @@ const generateOAuth2String = (): URL => {
 };
 
 const Login = () => {
-	const [intendedAction, setIntendedAction] = useState<IntendedAction | null>(
-		null
+	const [intendedAction, setIntendedAction] = useState<IntendedAction>(
+		IntendedAction.None
 	);
 	const [windowObjectReference, setWindowObjectReference] =
 		useState<Window | null>(null);
@@ -58,7 +66,7 @@ const Login = () => {
 	const sendAuthCodeToServer = useCallback(
 		(code: string, intendedAction: IntendedAction) => {
 			try {
-				setAuthStatus(AuthStatusEnum.WAITING);
+				setAuthStatus(AuthStatusEnum.AUTH);
 				fetch(BACKEND_URL + "/api/user/auth", {
 					method: "POST",
 					headers: {
@@ -71,40 +79,44 @@ const Login = () => {
 								? "LOGIN"
 								: "SIGNUP",
 					}),
-				})
-					.then((res) => res.json())
-					.then((data) => {
-						if (data.status_code > 403) {
-							showNotification("Error", data.message, "error");
-							setAuthStatus(AuthStatusEnum.ERROR);
-							return;
-						}
-						if (data.status_code == 403) {
-							showNotification("Warning", "Fill Details", "warning");
-							dispatch(
-								storeUserToken({
-									userToken: data.message,
-								})
-							);
-							navigate("/signup");
-							return;
-						}
-						if (intendedAction == IntendedAction.Login) {
-							dispatch(
-								storeUserToken({
-									userToken: data.message,
-								})
-							);
-						} else if (intendedAction == IntendedAction.Signup) {
-							dispatch(
-								storeUserToken({
-									userToken: data.message,
-								})
-							);
-						} else {
-							setAuthStatus(AuthStatusEnum.ERROR);
-						}
-					});
+				}).then(async (res) => {
+					const data = await res.json();
+
+					if (res.status > 403) {
+						showNotification("Error", data.message, "error");
+						setAuthStatus(AuthStatusEnum.ERROR);
+						return;
+					}
+
+					if (res.status === 403) {
+						showNotification("Warning", "Fill Details", "warning");
+						dispatch(
+							storeUserToken({
+								userToken: data,
+							})
+						);
+						navigate("/signup");
+						return;
+					}
+
+					if (intendedAction === IntendedAction.Login) {
+						setAuthStatus(AuthStatusEnum.SUCCESS);
+						dispatch(
+							storeUserToken({
+								userToken: data,
+							})
+						);
+					} else if (intendedAction === IntendedAction.Signup) {
+						setAuthStatus(AuthStatusEnum.SUCCESS);
+						dispatch(
+							storeUserToken({
+								userToken: data,
+							})
+						);
+					} else {
+						setAuthStatus(AuthStatusEnum.ERROR);
+					}
+				});
 			} catch (err) {
 				console.error(err);
 				setAuthStatus(AuthStatusEnum.ERROR);
@@ -136,9 +148,6 @@ const Login = () => {
 
 	const openWindow = useCallback(
 		(url: string, name: string) => {
-			if (user != null && user.userToken != undefined) {
-				return;
-			}
 			window.removeEventListener("message", receiveMessage);
 
 			const strWindowFeatures =
@@ -178,7 +187,7 @@ const Login = () => {
 
 	useEffect(() => {
 		if (
-			authStatus == AuthStatusEnum.ACCEPTED &&
+			authStatus === AuthStatusEnum.ACCEPTED &&
 			code != null &&
 			intendedAction != null
 		) {
@@ -187,14 +196,18 @@ const Login = () => {
 	}, [authStatus]);
 
 	useEffect(() => {
+		if (authStatus !== AuthStatusEnum.SUCCESS) {
+			return;
+		}
+
 		if (user != null && user.userToken != undefined) {
-			if (intendedAction == IntendedAction.Signup) {
+			if (intendedAction === IntendedAction.Signup) {
 				navigate("/signup");
-			} else if (intendedAction == IntendedAction.Login) {
+			} else if (intendedAction === IntendedAction.Login) {
 				navigate("/game");
 			}
 		}
-	}, [user]);
+	}, [user, authStatus]);
 
 	return (
 		<>
@@ -206,6 +219,7 @@ const Login = () => {
 						</h1>
 						<div>
 							<Button
+								loading={getAuthButtonLoadingState(authStatus)}
 								onClick={() => startAuth(IntendedAction.Login)}
 								size={"xl"}
 							>
@@ -248,9 +262,10 @@ const Login = () => {
 							Exercitationem, accusamus dolores?
 						</p>
 					</div>
-					<div className="z-10 absolute right-[17.5%] top-[63.5%]">
+					<div className="z-10 absolute right-[17.5%] top-[67%]">
 						<div>
 							<Button
+								loading={getAuthButtonLoadingState(authStatus)}
 								onClick={() => startAuth(IntendedAction.Signup)}
 								size={"xl"}
 								variant="default"

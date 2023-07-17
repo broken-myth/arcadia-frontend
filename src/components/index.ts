@@ -17,3 +17,7 @@ export { default as AdminLogin } from "./Admin/AdminLogin/AdminLogin";
 export { default as AdminNavbar } from "./Admin/AdminNavbar/AdminNavbar";
 export { default as UpdateConstant } from "./Admin/UpdateConstant/UpdateConstant";
 export { default as AdminDashboard } from "./Admin/AdminDashboard/AdminDashboard";
+export { default as Features } from "./Landing/Features";
+export { default as Learn } from "./Landing/Learn";
+export { default as Bottom } from "./Landing/Bottom";
+export { default as HowTo } from "./HowTo/HowTo";

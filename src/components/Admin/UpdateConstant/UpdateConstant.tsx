@@ -1,6 +1,6 @@
 import { useState } from "react";
 import EditConstantsBox from "./EditConstantsBox";
-import { mutations, queries } from "../../../utils/constants";
+import { Mutations, Queries } from "../../../utils/constants";
 import { useMutation, useQuery } from "react-query";
 import { dataFetch, getUser, showNotification } from "../../../utils/helpers";
 import { Center, Loader, Button } from "@mantine/core";
@@ -11,7 +11,7 @@ const UpdateConstants = () => {
 	const admin = getUser();
 
 	const { isLoading, isError, isSuccess } = useQuery({
-		queryKey: queries.getConstantsGET,
+		queryKey: Queries.getConstantsGET,
 		queryFn: async () =>
 			dataFetch({
 				user: admin,
@@ -20,7 +20,7 @@ const UpdateConstants = () => {
 		onSuccess: async (res) => {
 			const data = await res.json();
 			if (res && res.status == 200) {
-				setConstants(data.message);
+				setConstants(data);
 			} else {
 				showNotification("Oops", data.message, "error");
 			}
@@ -28,12 +28,12 @@ const UpdateConstants = () => {
 	});
 
 	const { mutate } = useMutation({
-		mutationKey: mutations.updateRedisPOST,
+		mutationKey: Mutations.updateRedisPATCH,
 		mutationFn: async () =>
 			dataFetch({
 				user: admin,
 				url: "/api/admin/updateRedis",
-				method: "POST",
+				method: "PATCH",
 				body: {},
 			}),
 		onSuccess: async (res) => {

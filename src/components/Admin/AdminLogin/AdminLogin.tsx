@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation } from "react-query";
-import { mutations } from "../../../utils/constants";
+import { Mutations } from "../../../utils/constants";
 import { Button, TextInput } from "@mantine/core";
 import { showNotification } from "../../../utils/helpers";
 import { BACKEND_URL } from "../../../../config";
@@ -14,7 +14,7 @@ const AdminLogin = (props: AdminLoginType) => {
 	const dispatch = useDispatch();
 
 	const { mutate } = useMutation({
-		mutationKey: mutations.adminLoginPOST,
+		mutationKey: Mutations.adminLoginPOST,
 		mutationFn: async () => {
 			return fetch(BACKEND_URL + "/api/admin/login", {
 				method: "POST",
@@ -25,19 +25,20 @@ const AdminLogin = (props: AdminLoginType) => {
 				headers: {
 					"Content-type": "application/json; charset=UTF-8",
 				},
-			}).then((response) => response.json());
+			});
 		},
 		onSuccess: async (res) => {
-			if (res.status_code === 200) {
+			const data = await res.json();
+			if (res.status === 200) {
 				showNotification("Success", "Login complete", "success");
 				dispatch(
 					storeUserToken({
-						userToken: res.message,
+						userToken: data,
 					})
 				);
 				props.setLoggedIn(true);
 			} else {
-				showNotification("Oops", res.message, "error");
+				showNotification("Oops", data.message, "error");
 			}
 		},
 	});

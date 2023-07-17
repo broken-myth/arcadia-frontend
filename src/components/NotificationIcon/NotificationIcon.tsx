@@ -3,7 +3,7 @@ import {
 	IconCircleCheck,
 	IconCircleX,
 	IconInfoCircle,
-} from "@tabler/icons";
+} from "@tabler/icons-react";
 
 const NotificationIcon = ({
 	type,

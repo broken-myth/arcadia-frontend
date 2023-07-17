@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { dataFetch, getUser } from "../../utils/helpers";
 import { useMutation } from "react-query";
-import { mutations } from "../../utils/constants";
+import { Mutations } from "../../utils/constants";
 import { Button, Select, TextInput } from "@mantine/core";
 import { showNotification } from "../../utils/helpers";
 const validate = ({
@@ -42,8 +42,8 @@ const Signup = () => {
 	const navigate = useNavigate();
 	const user = getUser();
 
-	const { mutate } = useMutation({
-		mutationKey: mutations.signupPOST,
+	const signup = useMutation({
+		mutationKey: Mutations.signupPOST,
 		mutationFn: () => {
 			const err = validate({ username, contact, college });
 			if (err !== null) {
@@ -62,21 +62,17 @@ const Signup = () => {
 			});
 		},
 		onSuccess: async (res) => {
+			const data = await res.json();
 			if (res.status === 200) {
 				showNotification("Success", "Signup complete", "success");
 				navigate("/game");
 			} else {
-				showNotification("Oops", "Something went wrong", "error");
-				showNotification(
-					"Contact Details",
-					"Make sure the phone number isn't already registered",
-					"info"
-				);
+				showNotification("Oops", data.message, "error");
 			}
 		},
 	});
 
-	if (!user.userToken) {
+	if (user !== null && user.userToken === null) {
 		navigate("/login");
 	}
 
@@ -146,8 +142,9 @@ const Signup = () => {
 				</div>
 				<div className="pb-10 w-full flex flex-row justify-center items-center">
 					<Button
+						loading={signup.isLoading}
 						onClick={() => {
-							mutate();
+							signup.mutate();
 						}}
 					>
 						Continue

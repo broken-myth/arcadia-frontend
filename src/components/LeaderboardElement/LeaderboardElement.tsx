@@ -1,4 +1,4 @@
-import { IconTrophy } from "@tabler/icons";
+import { IconTrophy } from "@tabler/icons-react";
 import React from "react";
 import { LeaderboardElementProps } from "./types";
 import cardinalToOrdinal from "../../utils/cardinalToOrdinal";
@@ -21,7 +21,7 @@ const LeaderboardElement: React.FC<LeaderboardElementProps> = ({
 			<div className="rounded-full col-span-1 w-7 h-7 md:w-10 md:h-10 border-2 md:border-4 border-solid">
 				<Image
 					src={`/assets/images/characters/avatars/${avatarUrl}`}
-					alt="User Profile"
+					alt="User Avatar"
 					radius={"xl"}
 				/>
 			</div>

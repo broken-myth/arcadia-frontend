@@ -83,6 +83,27 @@ const theme: MantineThemeOverride = {
 				},
 			}),
 		},
+		Skeleton: {
+			styles: {
+				root: {
+					"&:after": {
+						backgroundColor: "#ffffff10 !important",
+						animation: "skeleton 1.5s ease-in-out infinite !important",
+					},
+					"&:before": {
+						backgroundColor: "transparent !important",
+					},
+				},
+			},
+		},
+
+		Text: {
+			styles: {
+				root: {
+					cursor: "default",
+				},
+			},
+		},
 	},
 };
 

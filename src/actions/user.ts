@@ -15,7 +15,7 @@ export const getProfileSuccess = (data: { user: User }) => {
 
 export const updateProfileSuccess = (data: {
 	intendedUpdate: string;
-	newValue: string | number;
+	newValue?: string | number;
 }) => {
 	return {
 		type: UPDATE_PROFILE_SUCCESS,
